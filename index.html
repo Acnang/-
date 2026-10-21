@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이론 뽑기 🎲 랜덤 사회과학 이론</title>
+<meta name="description" content="깨진 유리창 이론부터 넛지, 피그말리온 효과까지. 버튼 하나로 랜덤 이론 뽑기!">
+<style>
+:root{
+  --bg1:#0f1226; --bg2:#1b1f45; --card:#ffffff10; --line:#ffffff22;
+  --text:#f2f4ff; --sub:#aab0d6; --accent:#ffd166;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  color:var(--text);
+  background:linear-gradient(160deg,var(--bg1),var(--bg2));
+  background-attachment:fixed;
+  overflow-x:hidden;
+}
+/* 떠다니는 배경 */
+.orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.45;z-index:0;animation:float 14s ease-in-out infinite}
+.orb.a{width:340px;height:340px;background:#6c63ff;top:-80px;left:-80px}
+.orb.b{width:300px;height:300px;background:#ff6b9d;bottom:-60px;right:-60px;animation-delay:-5s}
+.orb.c{width:240px;height:240px;background:#2ec4b6;top:45%;left:55%;animation-delay:-9s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-50px) scale(1.15)}}
+
+main{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:28px 18px 60px}
+h1{text-align:center;font-size:clamp(26px,6vw,38px);margin:8px 0 4px;letter-spacing:-.5px}
+.tag{text-align:center;color:var(--sub);margin:0 0 22px;font-size:14px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:22px}
+.chip{
+  border:1px solid var(--line);background:var(--card);color:var(--text);
+  padding:7px 14px;border-radius:999px;font-size:13px;cursor:pointer;transition:.2s;font-family:inherit
+}
+.chip:hover{transform:translateY(-2px)}
+.chip.on{background:var(--accent);color:#2a2200;border-color:var(--accent);font-weight:700}
+
+.stage{perspective:1200px;position:relative}
+.card{
+  position:relative;min-height:360px;border-radius:24px;padding:28px 24px;
+  background:linear-gradient(145deg,#ffffff18,#ffffff08);
+  border:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 20px 60px #0006;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.card.idle .placeholder{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.placeholder{text-align:center}
+.placeholder .big{font-size:76px;line-height:1}
+.placeholder p{color:var(--sub);margin:14px 0 0}
+
+.card.spinning{animation:shake .12s linear infinite}
+@keyframes shake{
+  0%{transform:rotate(-1deg) translateX(-3px)}
+  50%{transform:rotate(1deg) translateX(3px)}
+  100%{transform:rotate(-1deg) translateX(-3px)}
+}
+.card.spinning .slot{filter:blur(1.2px)}
+
+.card.reveal{animation:flipIn .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes flipIn{
+  0%{transform:rotateY(90deg) scale(.9);opacity:.2}
+  100%{transform:rotateY(0) scale(1);opacity:1}
+}
+.result{animation:rise .6s .15s both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.cat{display:inline-block;font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;color:#10122a}
+.slot{font-size:clamp(26px,6.5vw,38px);font-weight:800;margin:14px 0 2px;letter-spacing:-.5px;word-break:keep-all}
+.en{color:var(--sub);font-size:14px;margin-bottom:6px}
+.who{color:var(--accent);font-size:13px;margin-bottom:16px}
+.box{background:#00000030;border-radius:14px;padding:14px 16px;margin-top:10px;font-size:15px;line-height:1.65;word-break:keep-all}
+.box b{display:block;font-size:12px;color:var(--sub);margin-bottom:4px;letter-spacing:.5px}
+
+.actions{display:flex;gap:10px;margin-top:22px}
+.btn{
+  flex:1;border:0;border-radius:16px;padding:16px;font-size:18px;font-weight:800;cursor:pointer;
+  font-family:inherit;transition:.15s
+}
+.btn.main{background:linear-gradient(135deg,#ffd166,#ff9f6b);color:#2a1a00;box-shadow:0 8px 24px #ff9f6b55}
+.btn.main:hover{transform:translateY(-3px) scale(1.02)}
+.btn.main:active{transform:scale(.97)}
+.btn.main:disabled{opacity:.6;cursor:wait;transform:none}
+.btn.sub{flex:0 0 auto;background:var(--card);color:var(--text);border:1px solid var(--line);font-size:15px;padding:16px 18px}
+.btn.sub:hover{background:#ffffff22}
+
+.hist{margin-top:30px}
+.hist h2{font-size:14px;color:var(--sub);font-weight:600;margin:0 0 10px}
+.hist .list{display:flex;flex-wrap:wrap;gap:8px}
+.hist .chip{font-size:12px}
+.hint{text-align:center;color:var(--sub);font-size:12px;margin-top:26px}
+
+.spark{
+  position:fixed;width:10px;height:10px;border-radius:50%;pointer-events:none;z-index:5;
+  animation:burst .9s ease-out forwards
+}
+@keyframes burst{
+  to{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
+}
+.toast{
+  position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);
+  background:#000c;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;
+  opacity:0;transition:.3s;z-index:10;pointer-events:none
+}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important}
+}
+</style>
+</head>
+<body>
+<div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
+
+<main>
+  <h1>🎲 이론 뽑기</h1>
+  <p class="tag">깨진 유리창 이론부터 넛지까지 · <span id="count"></span>개 이론 중 하나를 랜덤으로!</p>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="stage">
+    <div class="card idle" id="card">
+      <div class="placeholder">
+        <div class="big">🔮</div>
+        <p>아래 버튼을 눌러 오늘의 이론을 뽑아보세요</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn main" id="draw">이론 뽑기!</button>
+    <button class="btn sub" id="copy" title="결과 복사">📋 복사</button>
+  </div>
+
+  <div class="hist" id="histWrap" hidden>
+    <h2>최근 뽑은 이론 (눌러서 다시 보기)</h2>
+    <div class="list" id="hist"></div>
+  </div>
+
+  <p class="hint">스페이스바 / 엔터로도 뽑을 수 있어요</p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 이론 데이터 (여기에 추가하면 자동 반영!) ============
+   c: 분류 / n: 이름 / e: 영문명 / w: 제안자·연도 / s: 한 줄 설명 / x: 예시 */
+const THEORIES = [
+  /* ---- 사회·범죄 ---- */
+  {c:'사회·범죄',n:'깨진 유리창 이론',e:'Broken Windows Theory',w:'제임스 Q. 윌슨 · 조지 켈링 (1982)',
+   s:'깨진 유리창을 방치하면 “이곳은 관리되지 않는다”는 신호가 되어 더 큰 범죄로 이어진다는 이론.',
+   x:'낙서와 쓰레기를 방치한 골목이 점점 더 지저분해지고 범죄가 늘어나는 경우. (효과에 대한 논쟁도 많아요)'},
+  {c:'사회·범죄',n:'낙인 이론',e:'Labeling Theory',w:'하워드 베커 (1963)',
+   s:'사람이 “일탈자”로 낙인찍히면 스스로도 그 정체성을 받아들여 일탈이 굳어진다는 이론.',
+   x:'한 번 비행으로 꼬리표가 붙은 학생이 주변의 시선 때문에 오히려 문제 행동을 이어가는 경우.'},
+  {c:'사회·범죄',n:'아노미 이론',e:'Anomie Theory',w:'에밀 뒤르켐 · 로버트 머튼',
+   s:'사회가 제시하는 목표(성공)와 이를 이룰 합법적 수단 사이에 괴리가 생기면 일탈이 늘어난다는 이론.',
+   x:'“성공해야 한다”는 압박은 큰데 기회는 부족할 때 편법·범죄를 택하는 경우.'},
+  {c:'사회·범죄',n:'차별적 접촉 이론',e:'Differential Association Theory',w:'에드윈 서덜랜드 (1939)',
+   s:'범죄는 타고나는 것이 아니라, 범죄에 우호적인 사람들과 어울리며 배우게 된다는 이론.',
+   x:'비행 친구들과 자주 어울리다 보니 비행 방법과 합리화 논리를 배우게 되는 경우.'},
+  {c:'사회·범죄',n:'사회유대(통제) 이론',e:'Social Bond Theory',w:'트래비스 허쉬 (1969)',
+   s:'애착·참여·신념 등 사회와의 유대가 강하면 일탈하지 않고, 약해지면 일탈한다는 이론.',
+   x:'가족·학교·동아리와의 유대가 끈끈한 학생일수록 비행 가능성이 낮아지는 경우.'},
+  {c:'사회·범죄',n:'일상활동 이론',e:'Routine Activity Theory',w:'로런스 코언 · 마커스 펠슨 (1979)',
+   s:'동기 있는 범죄자, 적당한 대상, 보호자의 부재 세 가지가 만나면 범죄가 발생한다는 이론.',
+   x:'CCTV와 가로등이 없는 야간 골목에서 범죄가 잘 발생하는 경우.'},
+  {c:'사회·범죄',n:'사회자본론',e:'Social Capital',w:'로버트 퍼트넘 (『나 홀로 볼링』, 2000)',
+   s:'신뢰·규범·네트워크 같은 사회적 관계가 공동체와 민주주의의 성과를 높인다는 이론.',
+   x:'이웃 간 신뢰가 높은 동네일수록 방범, 돌봄, 지역 활동이 활발한 경우.'},
+  {c:'사회·범죄',n:'유리천장',e:'Glass Ceiling',w:'1980년대 미국에서 대중화된 개념',
+   s:'능력이 있어도 성별·인종 등을 이유로 조직의 상층부로 올라가지 못하게 막는 보이지 않는 장벽.',
+   x:'여성 직원 비율은 높은데 임원·관리직 비율은 현저히 낮은 기업.'},
+  {c:'사회·범죄',n:'상징적 상호작용론',e:'Symbolic Interactionism',w:'조지 허버트 미드 · 허버트 블루머',
+   s:'사람들이 언어·몸짓 같은 상징을 주고받으며 의미를 만들고, 이를 바탕으로 사회가 형성된다는 관점.',
+   x:'같은 “엄지척” 이모지가 문화권에 따라 칭찬이 되기도 조롱이 되기도 하는 경우.'},
+
+  /* ---- 심리 ---- */
+  {c:'심리',n:'인지 부조화 이론',e:'Cognitive Dissonance Theory',w:'레온 페스팅거 (1957)',
+   s:'신념과 행동이 어긋나면 불편함을 느끼고, 이를 줄이려고 생각이나 행동을 바꾼다는 이론.',
+   x:'담배가 해롭다는 걸 알면서 피우는 사람이 “나는 괜찮을 거야”라고 합리화하는 경우.'},
+  {c:'심리',n:'피그말리온 효과',e:'Pygmalion Effect',w:'로버트 로젠탈 · 레노어 제이콥슨 (1968)',
+   s:'타인의 기대와 믿음이 실제 성과를 끌어올린다는 효과. (긍정적 기대 → 성과 향상)',
+   x:'“너는 잘할 수 있어”라는 선생님의 믿음 덕에 학생의 성적이 오르는 경우.'},
+  {c:'심리',n:'방관자 효과',e:'Bystander Effect',w:'빕 라타네 · 존 달리 (1968)',
+   s:'목격자가 많을수록 “누군가 돕겠지” 하며 책임이 분산되어 개입이 줄어드는 현상.',
+   x:'사람이 많은 길에서 쓰러진 사람을 모두가 서로 눈치만 보며 지나치는 경우.'},
+  {c:'심리',n:'매슬로의 욕구 위계 이론',e:"Maslow's Hierarchy of Needs",w:'에이브러햄 매슬로 (1943)',
+   s:'인간의 욕구는 생리 → 안전 → 소속·애정 → 존경 → 자아실현 순으로 단계가 있다는 이론.',
+   x:'배고픔이 해결되지 않으면 예술이나 자기계발에 관심을 갖기 어려운 경우.'},
+  {c:'심리',n:'학습된 무기력',e:'Learned Helplessness',w:'마틴 셀리그먼 (1967)',
+   s:'반복된 실패·통제 불가 경험을 하면 상황이 바뀌어도 시도 자체를 포기하게 되는 현상.',
+   x:'계속된 시험 실패로 “난 해도 안 돼”라며 공부를 아예 놓아버리는 학생.'},
+  {c:'심리',n:'더닝-크루거 효과',e:'Dunning–Kruger Effect',w:'데이비드 더닝 · 저스틴 크루거 (1999)',
+   s:'능력이 낮은 사람일수록 자신의 능력을 과대평가하는 경향이 있다는 인지 편향.',
+   x:'공부를 막 시작한 사람이 “이 정도면 다 알아”라고 느끼는 경우.'},
+  {c:'심리',n:'확증 편향',e:'Confirmation Bias',w:'피터 웨이슨 (1960)',
+   s:'자신의 믿음에 맞는 정보만 찾고, 반대되는 정보는 무시하거나 깎아내리는 경향.',
+   x:'내 의견과 같은 기사만 골라 읽고 “역시 내가 맞았어”라고 확신하는 경우.'},
+  {c:'심리',n:'후광 효과',e:'Halo Effect',w:'에드워드 손다이크 (1920)',
+   s:'한 가지 두드러진 특성이 다른 특성의 평가까지 좌우하는 현상.',
+   x:'잘생긴 사람이 성격도 좋고 일도 잘할 것이라고 믿어버리는 경우.'},
+  {c:'심리',n:'애착 이론',e:'Attachment Theory',w:'존 볼비 · 메리 에인스워스',
+   s:'어린 시절 양육자와 맺은 정서적 유대가 이후의 대인관계와 정서 발달의 토대가 된다는 이론.',
+   x:'안정적으로 돌봄을 받은 아이가 낯선 환경에서도 탐색을 잘하는 경우.'},
+  {c:'심리',n:'근접발달영역(ZPD)',e:'Zone of Proximal Development',w:'레프 비고츠키',
+   s:'혼자서는 어렵지만 도움을 받으면 해낼 수 있는 영역에서 학습이 가장 활발히 일어난다는 이론.',
+   x:'혼자 풀긴 어려운 문제를 선생님 힌트를 받아 풀어내며 실력이 느는 경우.'},
+  {c:'심리',n:'자기충족적 예언',e:'Self-fulfilling Prophecy',w:'로버트 머튼 (1948)',
+   s:'처음엔 틀린 믿음이었더라도, 그 믿음에 따라 행동하다 보면 결국 현실이 되어버리는 현상.',
+   x:'“은행이 망할 것 같다”는 소문에 사람들이 돈을 인출해 실제로 은행이 위기에 빠지는 뱅크런.'},
+
+  /* ---- 경제 ---- */
+  {c:'경제',n:'죄수의 딜레마',e:"Prisoner's Dilemma",w:'메릴 플러드 · 멜빈 드레셔 (1950), 앨버트 터커 명명',
+   s:'각자 자신에게 최선인 선택을 하면, 오히려 모두에게 더 나쁜 결과가 나오는 게임이론 상황.',
+   x:'두 기업이 서로 가격을 내리다가 둘 다 이익이 줄어드는 출혈 경쟁.'},
+  {c:'경제',n:'공유지의 비극',e:'Tragedy of the Commons',w:'개럿 하딘 (1968)',
+   s:'모두가 쓸 수 있는 공유 자원은 각자가 이익을 위해 과이용하다 결국 고갈된다는 이론.',
+   x:'공동 어장에서 모두가 더 많이 잡으려다 물고기 씨가 마르는 경우.'},
+  {c:'경제',n:'레몬 시장 이론',e:'Market for Lemons',w:'조지 애컬로프 (1970)',
+   s:'판매자만 품질을 아는 정보 비대칭 상황에서는 나쁜 상품만 남고 시장이 위축된다는 이론.',
+   x:'중고차 품질을 구매자가 알 수 없어 평균 가격이 낮아지고, 좋은 차는 시장에서 빠지는 경우.'},
+  {c:'경제',n:'넛지 이론',e:'Nudge Theory',w:'리처드 탈러 · 캐스 선스타인 (2008)',
+   s:'강제 없이 선택 환경을 설계해 사람들이 더 나은 선택을 하도록 부드럽게 유도하는 방법.',
+   x:'장기 기증 동의를 기본값(디폴트)으로 설정해 기증률을 높이는 경우.'},
+  {c:'경제',n:'전망 이론',e:'Prospect Theory',w:'대니얼 카너먼 · 아모스 트버스키 (1979)',
+   s:'사람은 같은 크기의 이득보다 손실을 더 크게 느끼며(손실 회피) 기준점에 따라 판단한다는 이론.',
+   x:'10만 원을 얻는 기쁨보다 10만 원을 잃는 아픔이 더 크게 느껴지는 경우.'},
+  {c:'경제',n:'비교우위론',e:'Comparative Advantage',w:'데이비드 리카도 (1817)',
+   s:'절대적으로 모든 면에서 뒤처져도, 상대적으로 더 잘하는 분야에 특화해 교역하면 모두 이익이라는 이론.',
+   x:'변호사가 타자도 더 빠르지만, 자기 시간을 법률 업무에 쓰고 비서에게 타자를 맡기는 경우.'},
+  {c:'경제',n:'그레셤의 법칙',e:"Gresham's Law",w:'토머스 그레셤 (16세기)',
+   s:'“악화(惡貨)가 양화(良貨)를 구축한다” — 품질이 다른 화폐가 함께 유통되면 좋은 것은 사라진다는 법칙.',
+   x:'금 함량이 높은 동전은 사람들이 쟁여두고, 함량이 낮은 동전만 시장에서 돌아다니는 경우.'},
+  {c:'경제',n:'보이지 않는 손',e:'Invisible Hand',w:'애덤 스미스 (『국부론』, 1776)',
+   s:'개인이 자기 이익을 추구해도 시장의 가격 기능을 통해 사회 전체의 자원 배분이 효율적으로 이루어진다는 개념.',
+   x:'빵집 주인이 돈을 벌려고 맛있는 빵을 만들다 보니 소비자도 이익을 얻는 경우.'},
+  {c:'경제',n:'낙수효과 이론',e:'Trickle-down Effect',w:'1980년대 레이건 정부 경제정책으로 유명',
+   s:'대기업·고소득층이 먼저 부유해지면 투자·소비가 늘어 그 효과가 저소득층까지 흘러내린다는 주장. (실효성에 논쟁이 큼)',
+   x:'대기업 감세로 투자와 고용이 늘어나 중소기업과 일반 가계에도 이익이 돌아간다는 논리.'},
+  {c:'경제',n:'베블런 효과',e:'Veblen Effect',w:'소스타인 베블런 (『유한계급론』, 1899)',
+   s:'가격이 오를수록 오히려 과시 욕구 때문에 수요가 늘어나는 현상.',
+   x:'명품 가방 가격이 올랐는데도 더 잘 팔리는 경우.'},
+
+  /* ---- 정치·국제 ---- */
+  {c:'정치·국제',n:'사회계약론',e:'Social Contract Theory',w:'홉스 · 로크 · 루소',
+   s:'국가는 자연 상태의 구성원들이 합의(계약)를 통해 만든 것이며, 권력의 정당성은 시민의 동의에서 나온다는 이론.',
+   x:'시민이 세금과 복종을 내놓는 대신 국가가 안전과 권리를 보장하는 구조.'},
+  {c:'정치·국제',n:'민주평화론',e:'Democratic Peace Theory',w:'칸트 (『영구평화론』, 1795), 이후 마이클 도일 등',
+   s:'민주주의 국가끼리는 서로 전쟁을 거의 하지 않는다는 이론.',
+   x:'오랜 민주국가인 서유럽 국가들 사이에 현재 전쟁이 일어날 가능성이 매우 낮은 경우.'},
+  {c:'정치·국제',n:'과두제의 철칙',e:'Iron Law of Oligarchy',w:'로베르트 미헬스 (1911)',
+   s:'아무리 민주적인 조직도 규모가 커지면 결국 소수 엘리트가 지배하게 된다는 법칙.',
+   x:'민주적으로 출발한 정당과 노조도 소수 지도부가 의사결정을 독점하게 되는 경우.'},
+  {c:'정치·국제',n:'중위투표자 정리',e:'Median Voter Theorem',w:'던컨 블랙 (1948) · 앤서니 다운스 (1957)',
+   s:'양당제에서 정당들은 승리를 위해 정책을 중간 성향 유권자 쪽으로 수렴시킨다는 이론.',
+   x:'선거철이 되면 극단적인 공약 대신 중도층을 겨냥한 공약이 늘어나는 경우.'},
+  {c:'정치·국제',n:'투키디데스의 함정',e:'Thucydides Trap',w:'그레이엄 앨리슨 (2010년대)',
+   s:'기존 패권국과 신흥 강대국이 부딪치면 전쟁으로 이어질 가능성이 크다는 주장.',
+   x:'고대 스파르타와 아테네의 갈등, 오늘날 미·중 관계 분석에서 자주 인용돼요.'},
+  {c:'정치·국제',n:'도미노 이론',e:'Domino Theory',w:'1950년대 미국 냉전 외교 논리',
+   s:'한 나라가 공산화되면 인접 국가들도 도미노처럼 연쇄적으로 공산화된다는 주장.',
+   x:'베트남전 개입의 근거로 사용된 논리. (이후 타당성에 대한 비판이 많았어요)'},
+  {c:'정치·국제',n:'집단사고',e:'Groupthink',w:'어빙 재니스 (1972)',
+   s:'응집력 높은 집단이 만장일치를 중시하다 비판적 검토를 못 하고 잘못된 결정을 내리는 현상.',
+   x:'아무도 반대 의견을 내지 못한 채 무모한 작전을 강행한 회의.'},
+  {c:'정치·국제',n:'침묵의 나선 이론',e:'Spiral of Silence',w:'엘리자베트 노엘레노이만 (1974)',
+   s:'사람들은 고립을 두려워해 소수 의견이라 느끼면 입을 다물고, 그래서 다수 의견이 더 커 보인다는 이론.',
+   x:'온라인 댓글창에서 소수 의견이 눈치를 보며 점점 사라지는 경우.'},
+  {c:'정치·국제',n:'의제설정 이론',e:'Agenda-setting Theory',w:'맥스웰 맥콤스 · 도널드 쇼 (1972)',
+   s:'언론은 “무엇을 생각할지”를 정해줌으로써 대중이 중요하게 여기는 이슈를 좌우한다는 이론.',
+   x:'뉴스가 연일 특정 사건을 크게 다루면 사람들이 그것을 사회의 중요 문제로 인식하는 경우.'},
+  {c:'정치·국제',n:'프레이밍 효과',e:'Framing Effect',w:'카너먼 · 트버스키 (1981)',
+   s:'같은 내용도 어떻게 표현(틀)하느냐에 따라 사람들의 판단과 선택이 달라지는 현상.',
+   x:'“생존율 90%”라고 하면 안심하지만 “사망률 10%”라고 하면 불안해지는 경우.'},
+
+  /* ---- 조직·경영 ---- */
+  {c:'조직·경영',n:'피터의 법칙',e:'Peter Principle',w:'로렌스 피터 (1969)',
+   s:'직원은 능력을 발휘하는 한 계속 승진하다가, 결국 무능한 지위에 이르러 멈춘다는 법칙.',
+   x:'뛰어난 영업사원이 관리자로 승진한 뒤 팀 운영에 어려움을 겪는 경우.'},
+  {c:'조직·경영',n:'파킨슨의 법칙',e:"Parkinson's Law",w:'시릴 노스코트 파킨슨 (1955)',
+   s:'업무량은 주어진 시간을 모두 채울 때까지 늘어난다는 법칙.',
+   x:'일주일 여유가 있다고 하면 하루면 끝날 과제도 마감 직전에야 끝내게 되는 경우.'},
+  {c:'조직·경영',n:'허즈버그의 2요인 이론',e:'Two-Factor Theory',w:'프레더릭 허즈버그 (1959)',
+   s:'불만을 줄이는 위생요인(임금·환경)과 만족을 높이는 동기요인(성취·인정)은 서로 다르다는 이론.',
+   x:'월급을 올려도 불만은 줄지만, 일에서 보람을 느끼게 하는 것은 별개의 문제인 경우.'},
+  {c:'조직·경영',n:'링겔만 효과',e:'Ringelmann Effect',w:'막시밀리앙 링겔만 (1913)',
+   s:'집단의 인원이 늘어날수록 1인당 노력은 오히려 줄어드는 현상(사회적 태만).',
+   x:'조별과제에서 인원이 많아질수록 “누가 하겠지” 하며 무임승차가 생기는 경우.'},
+  {c:'조직·경영',n:'티핑 포인트',e:'Tipping Point',w:'말콤 글래드웰 (2000)',
+   s:'작은 변화가 쌓이다가 어느 순간 폭발적으로 퍼지는 임계점이 있다는 개념.',
+   x:'조용하던 유행이 어느 날 갑자기 모두가 따라 하는 대세가 되는 경우.'}
+];
+/* ================================================================= */
+
+const COLORS = {'사회·범죄':'#ff8fa3','심리':'#b794f6','경제':'#ffd166','정치·국제':'#6ee7b7','조직·경영':'#7dd3fc'};
+const $ = id => document.getElementById(id);
+const card = $('card'), drawBtn = $('draw');
+let current = null, busy = false, filter = '전체', history = [];
+
+$('count').textContent = THEORIES.length;
+
+/* 분류 칩 */
+const cats = ['전체', ...new Set(THEORIES.map(t => t.c))];
+cats.forEach(c => {
+  const b = document.createElement('button');
+  b.className = 'chip' + (c === filter ? ' on' : '');
+  b.textContent = c === '전체' ? `전체 (${THEORIES.length})` : `${c} (${THEORIES.filter(t=>t.c===c).length})`;
+  b.onclick = () => {
+    filter = c;
+    document.querySelectorAll('#chips .chip').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+  };
+  $('chips').appendChild(b);
+});
+
+/* 카드 렌더 */
+function render(t, spinning){
+  card.className = 'card' + (spinning ? ' spinning' : '');
+  card.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = spinning ? '' : 'result';
+
+  const cat = document.createElement('span');
+  cat.className = 'cat'; cat.textContent = t.c; cat.style.background = COLORS[t.c] || '#fff';
+  const name = document.createElement('div'); name.className = 'slot'; name.textContent = t.n;
+  wrap.append(cat, name);
+
+  if(!spinning){
+    const en = document.createElement('div'); en.className = 'en'; en.textContent = t.e;
+    const who = document.createElement('div'); who.className = 'who'; who.textContent = '👤 ' + t.w;
+    const s = document.createElement('div'); s.className = 'box';
+    s.innerHTML = '<b>📖 한 줄 설명</b>'; s.append(document.createTextNode(t.s));
+    const x = document.createElement('div'); x.className = 'box';
+    x.innerHTML = '<b>💡 예시</b>'; x.append(document.createTextNode(t.x));
+    wrap.append(en, who, s, x);
+  }
+  card.appendChild(wrap);
+}
+
+/* 반짝이 효과 */
+function sparkle(){
+  const r = card.getBoundingClientRect();
+  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  const cols = ['#ffd166','#ff6b9d','#6ee7b7','#7dd3fc','#b794f6'];
+  for(let i=0;i<28;i++){
+    const p = document.createElement('span');
+    p.className = 'spark';
+    const a = Math.random()*Math.PI*2, d = 90 + Math.random()*170;
+    p.style.left = cx+'px'; p.style.top = cy+'px';
+    p.style.background = cols[i % cols.length];
+    p.style.setProperty('--dx', Math.cos(a)*d+'px');
+    p.style.setProperty('--dy', Math.sin(a)*d+'px');
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 950);
+  }
+}
+
+function reveal(t){
+  current = t;
+  render(t, false);
+  card.classList.add('reveal');
+  sparkle();
+  history = [t, ...history.filter(h => h !== t)].slice(0, 10);
+  renderHistory();
+}
+
+function renderHistory(){
+  $('histWrap').hidden = history.length === 0;
+  const box = $('hist'); box.innerHTML = '';
+  history.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = t.n;
+    b.onclick = () => { if(busy) return; current = t; render(t,false); card.classList.add('reveal'); };
+    box.appendChild(b);
+  });
+}
+
+/* 뽑기 (슬롯머신처럼 점점 느려지며 멈춤) */
+function draw(){
+  if(busy) return;
+  const pool = THEORIES.filter(t => filter === '전체' || t.c === filter);
+  let pick;
+  do { pick = pool[Math.floor(Math.random()*pool.length)]; }
+  while(pool.length > 1 && pick === current);
+
+  busy = true; drawBtn.disabled = true; drawBtn.textContent = '뽑는 중…';
+  const steps = 20; let i = 0;
+  (function tick(){
+    if(i < steps){
+      render(pool[Math.floor(Math.random()*pool.length)], true);
+      i++;
+      setTimeout(tick, 45 + i*i*0.5);
+    } else {
+      reveal(pick);
+      busy = false; drawBtn.disabled = false; drawBtn.textContent = '다시 뽑기!';
+    }
+  })();
+}
+
+drawBtn.onclick = draw;
+
+$('copy').onclick = () => {
+  if(!current){ toast('먼저 이론을 뽑아주세요!'); return; }
+  const t = current;
+  const text = `[${t.c}] ${t.n} (${t.e})\n${t.w}\n\n${t.s}\n예시: ${t.x}`;
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+    .then(() => toast('복사했어요 ✅'))
+    .catch(() => toast('복사에 실패했어요'));
+};
+
+function toast(msg){
+  const el = $('toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(()=>el.classList.remove('show'), 1600);
+}
+
+document.addEventListener('keydown', e => {
+  if(e.code === 'Space' || e.code === 'Enter'){
+    if(e.target.tagName === 'BUTTON') return;
+    e.preventDefault(); draw();
+  }
+});
+</script>
+</body>
+</html>
